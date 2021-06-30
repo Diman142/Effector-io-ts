@@ -1,26 +1,20 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import { Auth } from "./containers/Auth/Auth";
+import { Route, Switch } from "react-router-dom";
+import { Nav } from "./containers/Nav/Nav";
+import { PizzaPage } from "./containers/PizzaPage/PizzaPage";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export function App(): React.ReactElement {
+    return (
+        <div className="App">
+            <Nav />
+            <Switch>
+                <Route path="/pizza" component={PizzaPage} />
+                <Route path="/" component={Auth} />
+            </Switch>
+        </div>
+    );
 }
 
-export default App;
+

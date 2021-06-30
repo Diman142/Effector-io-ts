@@ -1,0 +1,23 @@
+.Nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    width: 100%;
+}
+
+.Nav ul {
+    display: flex;
+    justify-content: center;
+}
+
+.Nav ul li:not(:last-child) {
+    margin-right: 2rem;
+}
+
+.Nav ul li a {
+    font-size: 18px;
+    color: rgb(48, 46, 53);
+    font-weight: 500;
+}

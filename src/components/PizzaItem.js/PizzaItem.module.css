@@ -1,0 +1,42 @@
+.PizzaItem {
+    position: relative;
+    width: 100%;
+    background-image: url('../../assets/pizza.jpg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    font-size: 18px;
+    width: 480px;
+    height: 320px;
+    margin-bottom: 1rem;
+
+}
+
+.PizzaItem:not(:last-child){
+    margin-right: 2rem;
+}
+
+.PizzaItem p{
+    text-align: left;
+    padding-left: 1rem;
+    color: #fff;
+}
+
+.PizzaItem button {
+    position: absolute;
+    right: 5%;
+    top: 5%;
+    background-color: rgb(172, 21, 21);
+    height: 50px;
+    width: 115px;
+    color: #fff;
+    font-size: 18px;
+    border: none;
+    outline: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.PizzaItem button:hover {
+    background-color: rgb(116, 9, 9);
+}
