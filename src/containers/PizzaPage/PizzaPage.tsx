@@ -1,134 +1,58 @@
-
-import React from "react";
-import { crust, flavour, size, pizzaname, pizzaList, pizzasArray, token } from "../../effector/store";
-import { Input } from "../../components/Input/Input";
-import { Button } from "../../components/Button/Button";
-import { useStore } from "effector-react";
-import { getPizzasArr, addToPizzasArr, deleteFromPizzasArr, changePizzaName, changePizzaFlavour, 
-    changePizzaSize, changePizzaCrust, clearPizzaSize, clearPizzaCrust, clearPizzaFlavour, 
-    clearPizzaName, getPizzas } from "../../effector/event";
+import React, { useState } from "react";
 import classes from "./PizzaPage.module.css";
-import { getPizza, addPizza } from "../../helpers/api";
-import { useEffect, useState } from "react";
+import { getPizza } from "../../helpers/api";
+import { useEffect } from "react";
 import { Loader } from "../../components/Loader/Loader";
 import { PizzaItem } from "../../components/PizzaItem.js/PizzaItem";
-import { deleteItem } from "../../effector/event";
-import { PizzaItemProps, PizzaListProps } from "../../helpers/interfaces";
+import { PizzaCreateForm } from "../../components/PizzaForm/PizzaCreateForm";
+import * as t from "io-ts";
+import { useStore } from "effector-react";
+import { pizzasList, setPizzasArr } from "effector/store";
+import { serverDataDecoder } from "../../helpers/decoder";
 
+const Pizza = t.type({
+    id: t.string,
+    name: t.string,
+    flavour: t.string,
+    crust: t.string,
+    size: t.string
+}, "Pizza");
+
+const PizzaListType = t.record(t.string, Pizza);
+
+export type Pizza = t.TypeOf<typeof Pizza>;
+export type PizzaListType = t.TypeOf<typeof PizzaListType>;
 
 export const PizzaPage = (): React.ReactElement => {
 
-    const [isLoaded, setIsLoaded] = useState(false);
+    const errMessage = "Что-то пошло не так, попробуйте обновить страницы";
 
-    const pizzaNameValue = useStore(pizzaname);
-    const flavourValue = useStore(flavour);
-    const crustValue = useStore(crust);
-    const sizeValue = useStore(size);
-    const pizzaArr = useStore(pizzasArray) as PizzaItemProps[];
-    const authToken = useStore(token);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const pizzaArr = useStore(pizzasList) as Pizza[];
+    
 
     useEffect(() => {
         getPizza().then(result => {
-            getPizzas(result as unknown as PizzaListProps);
-            getPizzasArr(Object.values(result));
-            
+            if(Object.keys(result).length){
+                const val = serverDataDecoder(PizzaListType, result, errMessage);
+                setPizzasArr(Object.values(val));
+            }
         }).then(() => {
             setIsLoaded(true);
         });
     }, []);
 
-    const submitHandler = (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const obj = {
-                id: Date.now(),
-                crust: crustValue,
-                name: pizzaNameValue,
-                flavour: flavourValue,
-                size: sizeValue
-            };
-            if (authToken) {
-                addPizza(obj, authToken);
-                addToPizzasArr(obj);
-                clearPizzaName();
-                clearPizzaFlavour();
-                clearPizzaSize();
-                clearPizzaCrust();
-            } else {
-                alert("Авторизуйтесь чтобы добавить данные");
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    };
-
     return (
         <div>
-            <form onSubmit={submitHandler} className={classes.PizzaForm}>
-                <h2>Add Pizza</h2>
-                <Input id="userName" label="Pizza Name" value={pizzaNameValue} onChange={changePizzaName} />
-                <Input id="userPass" label="Pizza Flavour" value={flavourValue} onChange={changePizzaFlavour} />
-                <Input id="userName" label="Pizza Crust" value={crustValue} onChange={changePizzaCrust} />
-                <Input id="userPass" label="Pizza size" value={sizeValue} onChange={changePizzaSize} />
-                <Button type="success">Добавить пиццу</Button>
-            </form>
-
+            <PizzaCreateForm />
+            { console.log(pizzaArr) }
             { isLoaded ?
                 <ul className={classes.PizzaList}>
-                    { pizzaArr.map((item: PizzaItemProps) => {
-                        return (
-                            <PizzaItem key={item.id} name={item.name} flavour={item.flavour} crust={item.crust} size={item.size} id={item.id} />
-                        );
-                    }) }
+                    { pizzaArr.map((item: Pizza) => <PizzaItem key={item.id} name={item.name} flavour={item.flavour} crust={item.crust} size={item.size} id={item.id} />) }
                 </ul>
                 :
                 <Loader /> }
-
         </div>
     );
 };
-
-pizzaname
-    .on(changePizzaName, (_state, payload) => payload)
-    .reset(clearPizzaName);
-
-flavour
-    .on(changePizzaFlavour, (_state, payload) => payload)
-    .reset(clearPizzaFlavour);
-crust
-    .on(changePizzaCrust, (_state, payload) => payload)
-    .reset(clearPizzaSize);
-
-size
-    .on(changePizzaSize, (_state, payload) => payload)
-    .reset(clearPizzaCrust);
-
-
-pizzaList
-    .on(getPizzas, (_state: PizzaListProps, payload: PizzaListProps) => {
-        return { ...payload };
-    })
-    .on(deleteItem, (state: PizzaListProps, id: string) => {
-        for (const key in state) {
-            if (key === id) {
-                delete state[key];
-                break;
-            }
-        }
-        return state;
-    });
-
-
-pizzasArray
-    .on(getPizzasArr, (_state, payload: PizzaItemProps[]) => [...payload])
-    .on(addToPizzasArr, (state: PizzaItemProps[], payload: PizzaItemProps) => {
-        state.push(payload);
-        return state;
-    })
-    .on(deleteFromPizzasArr, (state, id) => {
-        return state.filter((item: PizzaItemProps) => {
-            if (item.id !== +id) return true;
-            return false;
-        });
-    });
 

@@ -5,7 +5,7 @@ interface InputProps {
     id: string
     label: string
     type?: string
-    value: string
+    value: string 
     onChange: (value?: string) => void
 }
 
